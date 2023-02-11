@@ -1,0 +1,52 @@
+version: '3.5'
+
+services:
+  laravel-app:
+    build:
+      context: '.'
+      args:
+        uid: ${UID}
+        user: ugo
+    image: ugo:php
+    container_name: laravel-app
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      - APACHE_RUN_USER=#1000
+      - APACHE_RUN_GROUP=#1000
+    volumes:
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      backend:
+        aliases:
+          - app
+
+  mysql-db:
+    image: mysql:5.7
+    container_name: mysql-db
+    ports:
+      - 3306:3306
+    volumes:
+      - dbdata:/var/lib/mysql/
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+    environment:
+      - MYSQL_ROOT_PASSWORD=securerootpassword
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    networks:
+      backend:
+        aliases:
+          - mysql-db
+
+networks:
+  backend:
+    name: laravel-network
+    
+    
+#Volumes
+volumes:
+  dbdata:
+    driver: local
